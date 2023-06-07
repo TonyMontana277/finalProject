@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Entity
 @Table
@@ -23,6 +25,9 @@ public class Room {
     @ManyToOne
     @JoinColumn
     private Visitor visitor;
+
+   @OneToMany(mappedBy = "room")
+   private List<Reservation> reservations;
 
 
 
