@@ -24,6 +24,9 @@ public class Room {
     @Column
     private Boolean available;
 
+    @ManyToOne
+    private Visitor visitor;
+
    @OneToMany(mappedBy = "room")
    private List<Reservation> reservations;
 
