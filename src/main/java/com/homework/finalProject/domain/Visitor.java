@@ -27,4 +27,7 @@ public class Visitor {
 
     @OneToMany(mappedBy = "visitor")
     private List<Room> rooms;
+
+    @OneToMany
+    private List<Reservation> reservations;
 }

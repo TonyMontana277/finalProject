@@ -1,19 +1,18 @@
 package com.homework.finalProject.rest;
 
 import com.homework.finalProject.Service.RoomService;
+import com.homework.finalProject.domain.Room;
 import com.homework.finalProject.dto.RoomDto;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 public class RoomController {
-    private RoomService roomService;
+    private final RoomService roomService;
     @GetMapping("/rooms")
     public ResponseEntity<List<RoomDto>> findAllRooms(){
         return ResponseEntity.ok(roomService.findAll());
@@ -25,11 +24,13 @@ public class RoomController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<Void> create(){
-        roomService.createRooms();
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    @PostMapping("/rooms")
+    public void addRoom(@RequestBody Room room){
+        roomService.addRoom(room);
     }
+
+
+
 //    @GetMapping("/free-rooms")
 //    public void findAllFreeRooms(){
 //
@@ -39,13 +40,9 @@ public class RoomController {
 //
 //    }
 //
-//    @PostMapping("/rooms")
-//    public void addRoom(){
 //
-//    }
-//
-//    @DeleteMapping("/rooms")
-//    public void deleteRoom(){
-//
-//    }
+    @DeleteMapping("/rooms")
+    public void deleteRoom(@PathVariable Long id){
+        roomService.deleteRoom(id);
+    }
 }

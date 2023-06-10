@@ -2,6 +2,7 @@ package com.homework.finalProject.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.util.List;
 @Table
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,11 +22,7 @@ public class Room {
     @Column
     private Integer capacity;
     @Column
-    private Boolean availability;
-
-    @ManyToOne
-    @JoinColumn
-    private Visitor visitor;
+    private Boolean available;
 
    @OneToMany(mappedBy = "room")
    private List<Reservation> reservations;
