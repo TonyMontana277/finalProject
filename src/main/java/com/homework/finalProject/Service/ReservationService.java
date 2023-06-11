@@ -142,6 +142,22 @@ public class ReservationService {
     }
 
     public void deleteReservation(Long id) {
-        reservationRepository.deleteById(id);
+        Optional<Reservation> reservationOptional = reservationRepository.findById(id);
+
+        if (reservationOptional.isPresent()) {
+            Reservation reservation = reservationOptional.get();
+
+            // Remove the reference to the reservation from rooms
+            for (Room room : reservation.getRooms()) {
+                room.setReservation(null);
+                room.setAvailable(true);
+                roomRepository.save(room);
+            }
+
+            // Delete the reservation
+            reservationRepository.delete(reservation);
+        } else {
+            throw new RuntimeException("Reservation not found");
+        }
     }
 }
