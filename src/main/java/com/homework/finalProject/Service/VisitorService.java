@@ -6,6 +6,7 @@ import com.homework.finalProject.repository.VisitorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -46,6 +47,24 @@ public class VisitorService {
 
     public Optional<VisitorDto> findVisitorByPassportId(Long id){
         return visitorRepository.findVisitorByPassportId(id).map(VisitorService::buildVisitorDto);
+    }
+
+    public VisitorDto updateVisitorInformation(Long id, Visitor visitor){
+        Optional<Visitor> optionalVisitor = visitorRepository.findById(id);
+        if (optionalVisitor.isPresent()){
+            Visitor existingVisitor = optionalVisitor.get();
+            existingVisitor.setName(visitor.getName());
+            existingVisitor.setPassportId(visitor.getPassportId());
+          Visitor visitorToBuildDto = visitorRepository.save(existingVisitor);
+            return buildVisitorDto(visitorToBuildDto);
+        }else {
+            try {
+                throw new FileNotFoundException();
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
     }
 
 }
