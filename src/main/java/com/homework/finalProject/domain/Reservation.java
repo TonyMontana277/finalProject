@@ -1,11 +1,13 @@
 package com.homework.finalProject.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table
@@ -21,9 +23,9 @@ public class Reservation {
     @Column
     private LocalDate endDate;
 
-    @ManyToOne
-    @JoinColumn(name = "roomId")
-    private Room room;
+    @OneToMany(mappedBy = "reservation")
+    @JsonIgnoreProperties("reservation") // Add this line to ignore the circular reference
+    private List<Room> rooms;
 
     @ManyToOne
     @JoinColumn(name = "visitor_id")

@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Entity
 @Table
@@ -25,11 +23,8 @@ public class Room {
     private Boolean available;
 
     @ManyToOne
-    private Visitor visitor;
-
-   @OneToMany(mappedBy = "room")
-   private List<Reservation> reservations;
-
+    @JoinColumn(name = "reservation_id")
+    private Reservation reservation;
 
 
 }
