@@ -33,7 +33,7 @@ public class ReservationService {
 
             return ReservationDto.builder()
                     .id(reservation.getId())
-                    .visitor(reservation.getVisitor())
+                    .visitor(reservation.getVisitor().getId())
                     .startDate(reservation.getStartDate())
                     .endDate(reservation.getEndDate())
                     .roomIds(roomIds)
@@ -112,6 +112,7 @@ public class ReservationService {
             existingReservation.getRooms().add(room);
 
             // Set the room availability to false
+            room.setReservation(existingReservation);
             room.setAvailable(false);
 
             return reservationRepository.save(existingReservation);
@@ -140,4 +141,7 @@ public class ReservationService {
         }
     }
 
+    public void deleteReservation(Long id) {
+        reservationRepository.deleteById(id);
+    }
 }

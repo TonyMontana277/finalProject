@@ -23,7 +23,7 @@ public class Reservation {
     @Column
     private LocalDate endDate;
 
-    @OneToMany(mappedBy = "reservation")
+    @OneToMany(mappedBy = "reservation", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JsonIgnoreProperties("reservation") // Add this line to ignore the circular reference
     private List<Room> rooms;
 
