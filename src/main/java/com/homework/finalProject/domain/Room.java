@@ -26,5 +26,11 @@ public class Room {
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
 
+    public Room(Long roomId, int i, boolean b) {
+    }
+
+    public Boolean isAvailable() {
+        return available;
+    }
 
 }
