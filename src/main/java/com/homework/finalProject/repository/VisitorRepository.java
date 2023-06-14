@@ -12,3 +12,5 @@ public interface VisitorRepository extends JpaRepository<Visitor, Long>{
 
     Optional<Visitor> findVisitorByPassportId(Long passportId);
 }
+
+

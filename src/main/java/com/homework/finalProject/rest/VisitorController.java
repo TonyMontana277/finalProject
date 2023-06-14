@@ -4,6 +4,7 @@ import com.homework.finalProject.Service.VisitorService;
 import com.homework.finalProject.domain.Visitor;
 import com.homework.finalProject.dto.VisitorDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +35,7 @@ public class VisitorController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/visitors/{passportId}")
+    @GetMapping("/visitors/passport/{passportId}")
     public ResponseEntity<VisitorDto> findVisitorByPassportId(@PathVariable Long passportId){
         return visitorService.findVisitorByPassportId(passportId)
                 .map(ResponseEntity::ok).
@@ -46,11 +47,13 @@ public class VisitorController {
         return visitorService.addVisitor(visitor);
     }
 
-//    @PostMapping
-//    public void addVisitorToRoom(){
-//
-//    }
-//
+
+    @PutMapping("/visitors/update/{id}")
+    public ResponseEntity<VisitorDto> updateVisitorInformation(@PathVariable Long id, @RequestBody Visitor visitor) {
+        visitorService.updateVisitorInformation(id, visitor);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
 //    @PostMapping
 //    public void transferVisitorToRoom(){
 //

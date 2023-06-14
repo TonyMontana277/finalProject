@@ -25,9 +25,7 @@ public class Visitor {
     @Column
     private Long passportId;
 
-    @OneToMany(mappedBy = "visitor")
-    private List<Room> rooms;
 
-    @OneToMany
+    @OneToMany(mappedBy = "visitor")
     private List<Reservation> reservations;
 }

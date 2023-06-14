@@ -2,6 +2,7 @@ package com.homework.finalProject.Service;
 
 import com.homework.finalProject.domain.Reservation;
 import com.homework.finalProject.domain.Room;
+import com.homework.finalProject.domain.Visitor;
 import com.homework.finalProject.dto.ReservationDto;
 import com.homework.finalProject.repository.ReservationRepository;
 import com.homework.finalProject.repository.RoomRepository;
@@ -10,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -22,65 +25,103 @@ public class ReservationService {
     private final RoomRepository roomRepository;
     private  final VisitorRepository visitorRepository;
 
-    private static ReservationDto buildReservationDto(Reservation reservation){
-        return ReservationDto.builder()
-                .room(reservation.getRoom())
-                .id(reservation.getId())
-                .visitor(reservation.getVisitor())
-                .startDate(reservation.getStartDate())
-                .endDate(reservation.getEndDate())
-                .build();
+    private static ReservationDto buildReservationDto(Reservation reservation) {
+        if (reservation != null) {
+            List<Long> roomIds = reservation.getRooms().stream()
+                    .map(Room::getId)
+                    .collect(Collectors.toList());
+
+            return ReservationDto.builder()
+                    .id(reservation.getId())
+                    .visitor(reservation.getVisitor().getId())
+                    .startDate(reservation.getStartDate())
+                    .endDate(reservation.getEndDate())
+                    .roomIds(roomIds)
+                    .build();
+        } else {
+            return null; // Return null for null reservations
+        }
     }
 
-    public List<ReservationDto> findAll(){
-        return reservationRepository.findAll().stream()
-                .map(ReservationService::buildReservationDto)
-                .collect(Collectors.toList());
+
+
+    public List<ReservationDto> findAll() {
+        List<Reservation> reservations = reservationRepository.findAll();
+
+        if (reservations != null) {
+            return reservations.stream()
+                    .filter(Objects::nonNull)
+                    .map(ReservationService::buildReservationDto)
+                    .filter(Objects::nonNull) // Filter out any null reservation DTOs
+                    .collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
-    public void addVisitorToReservation(Long visitorId, Long reservationId){
-        var visitor = visitorRepository.findById(visitorId).get();
-        var reservation = reservationRepository.findById(reservationId).get();
-        reservation.setVisitor(visitor);
 
-        reservationRepository.save(reservation);
+
+    public void addVisitorToReservation(Long reservationId, Long visitorId) {
+        Optional<Reservation> reservationOptional = reservationRepository.findById(reservationId);
+        Optional<Visitor> visitorOptional = visitorRepository.findById(visitorId);
+
+        if (reservationOptional.isPresent() && visitorOptional.isPresent()) {
+            Reservation reservation = reservationOptional.get();
+            Visitor visitor = visitorOptional.get();
+
+            reservation.setVisitor(visitor);
+            reservationRepository.save(reservation);
+        } else {
+            throw new RuntimeException("Reservation or Visitor not found");
+        }
     }
 
-    public void addRoomToReservation(Long roomId, Long reservationId){
-        var room = roomRepository.findById(roomId).get();
-        var reservation = reservationRepository.findById(reservationId).get();
-        reservation.setRoom(room);
-        room.setAvailable(false);
-        System.out.println("success1");
-        reservationRepository.save(reservation);
-        System.out.println("success2");
+    public void addRoomToReservation(Long roomId, Long reservationId) {
+        Optional<Room> roomOptional = roomRepository.findById(roomId);
+        Optional<Reservation> reservationOptional = reservationRepository.findById(reservationId);
+
+        if (roomOptional.isPresent() && reservationOptional.isPresent()) {
+            Room room = roomOptional.get();
+            Reservation reservation = reservationOptional.get();
+
+            room.setReservation(reservation); // Set the reservation for the room
+            room.setAvailable(false);
+
+            roomRepository.save(room); // Save the updated room
+        } else {
+            // Handle the case when either the room or reservation is not found
+            // You can throw an exception, log an error, or take appropriate action based on your requirements
+        }
     }
+
 
     public Reservation createReservation(Reservation reservation){
         return reservationRepository.save(reservation);
     }
 
 
-    public ReservationDto updateRoomReservation(Long id, Long roomId){
-        //look up reservation and room in db
+    public Reservation updateRoomReservation(Long id, Long roomId) {
         Optional<Reservation> optionalReservation = reservationRepository.findById(id);
-        Optional<Room> room = roomRepository.findById(roomId);
-        if (optionalReservation.isPresent() && room.isPresent()){
+        Optional<Room> roomOptional = roomRepository.findById(roomId);
+
+        if (optionalReservation.isPresent() && roomOptional.isPresent()) {
             Reservation existingReservation = optionalReservation.get();
-            existingReservation.setRoom(room.get());
-            // Change the availability of the room to false
-            Room updatedRoom = room.get();
-            updatedRoom.setAvailable(false);
-            Reservation reservation = reservationRepository.save(existingReservation);
-            return buildReservationDto(reservation);
-        }else {
-            try {
-                throw new FileNotFoundException();
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
-            }
+            Room room = roomOptional.get();
+
+            // Add the room to the list of rooms in the reservation
+            existingReservation.getRooms().add(room);
+
+            // Set the room availability to false
+            room.setReservation(existingReservation);
+            room.setAvailable(false);
+
+            return reservationRepository.save(existingReservation);
+        } else {
+            throw new RuntimeException("Reservation or Room not found");
         }
     }
+
+
 
     public ReservationDto updateReservationDate(Long id, Reservation reservation){
         Optional<Reservation> optionalReservation = reservationRepository.findById(id);
@@ -100,4 +141,23 @@ public class ReservationService {
         }
     }
 
+    public void deleteReservation(Long id) {
+        Optional<Reservation> reservationOptional = reservationRepository.findById(id);
+
+        if (reservationOptional.isPresent()) {
+            Reservation reservation = reservationOptional.get();
+
+            // Remove the reference to the reservation from rooms
+            for (Room room : reservation.getRooms()) {
+                room.setReservation(null);
+                room.setAvailable(true);
+                roomRepository.save(room);
+            }
+
+            // Delete the reservation
+            reservationRepository.delete(reservation);
+        } else {
+            throw new RuntimeException("Reservation not found");
+        }
+    }
 }

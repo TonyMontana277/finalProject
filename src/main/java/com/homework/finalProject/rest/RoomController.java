@@ -4,6 +4,7 @@ import com.homework.finalProject.Service.RoomService;
 import com.homework.finalProject.domain.Room;
 import com.homework.finalProject.dto.RoomDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,12 @@ public class RoomController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("rooms/available")
+    public ResponseEntity<List<Room>> getAllAvailableRooms() {
+        List<Room> availableRooms = roomService.findAllAvailableRooms();
+        return new ResponseEntity<>(availableRooms, HttpStatus.OK);
+    }
+
     @PostMapping("/rooms")
     public void addRoom(@RequestBody Room room){
         roomService.addRoom(room);
@@ -41,7 +48,7 @@ public class RoomController {
 //    }
 //
 //
-    @DeleteMapping("/rooms")
+    @DeleteMapping("/rooms/{id}")
     public void deleteRoom(@PathVariable Long id){
         roomService.deleteRoom(id);
     }

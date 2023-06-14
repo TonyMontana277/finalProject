@@ -91,5 +91,10 @@ public class RoomService {
          }
       }
    }
+
+   public List<Room> findAllAvailableRooms() {
+      return  roomRepository.findAllAvailableRooms();
+   }
+
 }
 
